@@ -1,0 +1,106 @@
+export const PARAM_TIPS: Record<string, string> = {
+  ratio: 'In tap mode, scales the delay time relative to tapped tempo. In knob mode, sets delay time directly (20ms–1.2s).',
+  mix: 'Wet/dry balance. CCW = 100% dry, CW = 100% wet, ~2 o\'clock = 50/50.',
+  volume: 'Overall output volume. 12 o\'clock is unity gain.',
+  feedback: 'How long the delay takes to decay. Higher = more repeats.',
+  tone: 'EQ applied to the delay line. Center is neutral.',
+  thing1: 'Mode-specific parameter. See mode reference for details.',
+  thing2: 'Mode-specific parameter. See mode reference for details.',
+}
+
+export const DELAY_SOURCE_TIPS: Record<string, string> = {
+  global: 'Global Tap — shared tempo across engines. MIDI clock syncs here.',
+  local: 'Local Tap — per-preset tempo, saved with the preset.',
+  knob: 'Knob — delay time set by the ratio knob (20ms–1.2s).',
+}
+
+export const ROUTING_TIPS: Record<string, string> = {
+  single: 'Single engine mode. Only Engine A is active.',
+  parallel: 'Both engines run in parallel, mixed together.',
+  serial: 'Engine A feeds into Engine B in series.',
+  leftRight: 'Engine A outputs left, Engine B outputs right.',
+}
+
+export const GLOBAL_TIPS = {
+  bypass: 'Toggle the pedal effect on/off.',
+  tap: 'Tap to set delay tempo. Average of last few taps.',
+  infinite: 'Hold for infinite repeats. Release to return to normal feedback.',
+  bpmInput: 'Type a BPM (20–300) and press Enter to set tempo via two simulated taps.',
+  engineOrder: 'Swap the order of Engine A and B. Useful in serial mode.',
+  soloA: 'Solo Engine A — mutes Engine B temporarily.',
+  soloB: 'Solo Engine B — mutes Engine A temporarily.',
+  clockA: 'Enable/disable MIDI clock sync for Engine A. Requires Global Tap mode.',
+  clockB: 'Enable/disable MIDI clock sync for Engine B. Requires Global Tap mode.',
+  sync: 'Push all current editor parameter values to the pedal as CC messages.',
+  save: 'Save the current editor state to this preset slot on the pedal.',
+  expression: 'Virtual expression pedal (0–127). Controls whichever params are mapped on the pedal.',
+}
+
+export const PRESET_TIPS = {
+  copy: 'Copy this preset\'s settings to clipboard.',
+  paste: 'Paste the copied preset into this slot.',
+  rename: 'Rename this preset.',
+  import: 'Import .bin preset files from your computer.',
+  export: 'Export the active preset as a .bin file.',
+  exportAll: 'Export all presets as a .zip for SD card transfer.',
+}
+
+export const MODE_CATEGORY_TIPS: Record<string, string> = {
+  Digital: 'Clean, pristine digital delays with options for ping pong, ducking, and dynamic feedback.',
+  Tape: 'Tape echo emulations — new tape, old tape, Echoplex, and Space Echo.',
+  Analog: 'Analog bucket-brigade and vintage delay emulations — BBD, Memory Boy, Echorec.',
+  Multi: 'Multi-tap delay patterns with variable intensities and panning.',
+  Mod: 'Modulated delays — panning, tremolo, and waveform-shaped modulation.',
+  Filter: 'Filter effects on the delay — pulse filter, envelope-following warp, swoosh.',
+  Ambient: 'Ambient/experimental — swell, freeze, long delay, diffusion.',
+  'Delay + Reverb': 'Combined delay and reverb — hall and plate reverb options.',
+  Reverse: 'Reversed audio delays with pitch shifting and triggered modes.',
+  Stutter: 'Chopped and glitchy delays — chop, stutter, and granular.',
+  'Lo-Fi': 'Lo-fi degradation — vintage character, aliasing, and distorted swells.',
+  Whisky: 'Pitch-shifted delays — seesaw, glitch, and shimmer effects.',
+}
+
+export const SUB_MODE_TIPS: Record<string, string> = {
+  'Pristine': 'Clean and pristine digital delay.',
+  'Short Stuff 1980': 'Divides tap time by 4 for slap-back.',
+  'Ping Pong': 'Classic stereo ping pong delay.',
+  'Dynamic Duck': 'Wet signal ducks when playing louder, returns on trails.',
+  'Dynamic Feedback': 'Feedback is compressed by the input signal.',
+  'New Tape': 'Good bandwidth tape with some wow and flutter.',
+  'Old Tape': 'Warm old tape character.',
+  'Echoplex': 'Echoplex tape echo emulation.',
+  'Space Echo': 'Roland RE-201 single-tap emulation.',
+  'BBD': 'Bucket brigade analog delay.',
+  'Tube BBD': 'Extra tubey bucket brigade.',
+  'Deluxe Memory Boy': 'Classic with stackable vibrato and chorus.',
+  'Echorec': 'Binson Echorec — four playback heads, one record head.',
+  'Digital Multi': 'Multi-tap delay with variable intensities.',
+  'Tone Taps': 'Each tap has a different tone.',
+  'Preset Pattern': 'Selectable multi-tap patterns from a single tap.',
+  'Panning Delay': 'Delay pans back and forth in stereo.',
+  'Trem Delay': 'Tremolo applied to the delay output.',
+  'Waveform': 'Modulation with selectable waveform shapes.',
+  'Filter Pulse': 'Moving bandpass filter on the delay signal.',
+  'Filter Warp': 'Envelope-following filter that reacts to delay volume.',
+  'Swoosh Echo': 'Filtered delays that swoosh downward in tone.',
+  'Drunk Ewok': 'Between multi-tap delay and reverb. Also known as "Lost in Space".',
+  'Triggered Swell': 'Input is ducked on note onset, creating swells.',
+  'Triggered Multi Swell': 'Multi-tap version of triggered swell with flanger.',
+  'Long Delay': 'Delay up to 8 seconds with knob time.',
+  'Input Rider': 'Utility mode — ride delay input via expression pedal.',
+  'Freezification': 'Tap stompswitch freezes the sound. Feedback does nothing.',
+  'Hall': 'Delay combined with hall reverb.',
+  'Plate': 'Delay combined with plate reverb.',
+  'Reverse Delay': 'Chops input and plays it backwards.',
+  'Reverse Dual Pitch': 'Two pitch-shifted reverse delays (±cents to ±octave).',
+  'Triggered Reverse': 'Note trigger resets reverse counter with swell.',
+  'Chop Mode': 'Signal gets chopped before feeding the delay.',
+  'Auto Stutter': 'Detects notes and stutters. Feedback adds distortion.',
+  'Granular': 'Slices signal into grains. Tap freezes grain record.',
+  'Old Timer': 'Lo-fi with resonant filters.',
+  'Digital Death Robot': 'Aliased digital destruction.',
+  'Distorted Swells': 'High feedback swells into nasty distortion.',
+  "Knobs' Seesaw": 'Two pitched delays — switches between them based on playing dynamics.',
+  'Christopher Glitchens': 'Two pitched delays with full variable pitch (−1 to +1 octave).',
+  'Shimmery Fixed Pitch': 'Constant pitch shift on the delay line.',
+}
