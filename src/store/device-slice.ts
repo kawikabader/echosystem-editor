@@ -1,7 +1,7 @@
 import type { StateCreator } from 'zustand'
 import type { MidiValue } from '../lib/midi-types'
 import type { EngineState, GlobalState, TunableParam, Routing, DelaySource, EngineId } from '../lib/echosystem'
-import { createDefaultEngine, delaySourceToMidi } from '../lib/echosystem'
+import { createDefaultEngine } from '../lib/echosystem'
 import { computeModeCC } from '../lib/echosystem'
 import { ENGINE_CC, GLOBAL_CC } from '../lib/midi-constants'
 import { ROUTING_VALUES, DELAY_SOURCE_VALUES } from '../lib/echosystem/types'
@@ -20,7 +20,6 @@ export interface DeviceSlice {
   setDelaySource: (engine: EngineId, source: DelaySource) => void
   setRouting: (routing: Routing) => void
   toggleBypass: () => void
-  setBypass: (bypassed: boolean) => void
   setSoloEngine: (engine: EngineId | null) => void
   sendFullState: () => void
   applyEngineState: (engine: EngineId, state: EngineState) => void
@@ -65,7 +64,7 @@ export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', neve
   setDelaySource: (engine, source) => {
     const ch = get().midiChannel
     const cc = ENGINE_CC[engine].delaySource
-    midi.sendCC(ch, cc, delaySourceToMidi(source))
+    midi.sendCC(ch, cc, DELAY_SOURCE_VALUES[source])
 
     set((state) => {
       const eng = engine === 'A' ? state.engineA : state.engineB
@@ -90,15 +89,6 @@ export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', neve
 
     set((state) => {
       state.global.bypassed = newBypassed
-    })
-  },
-
-  setBypass: (bypassed) => {
-    const ch = get().midiChannel
-    midi.sendCC(ch, GLOBAL_CC.engageBypass, bypassed ? 0 : 127)
-
-    set((state) => {
-      state.global.bypassed = bypassed
     })
   },
 

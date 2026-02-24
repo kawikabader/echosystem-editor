@@ -37,7 +37,7 @@ export function GlobalControls() {
       {isDual && (
         <>
           <div className="space-y-1.5">
-            <label className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+            <label className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
               Engine Order
             </label>
             <Tooltip text={GLOBAL_TIPS.engineOrder}>
@@ -51,7 +51,7 @@ export function GlobalControls() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+            <label className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
               Solo
             </label>
             <div className="grid grid-cols-2 gap-1">

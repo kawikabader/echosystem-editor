@@ -10,24 +10,11 @@ export const DELAY_SOURCE_VALUES: Record<DelaySource, number> = {
   knob: 2,
 }
 
-export const DELAY_SOURCE_FROM_VALUE: Record<number, DelaySource> = {
-  0: 'global',
-  1: 'local',
-  2: 'knob',
-}
-
 export const ROUTING_VALUES: Record<Routing, number> = {
   single: 0,
   parallel: 1,
   serial: 2,
   leftRight: 3,
-}
-
-export const ROUTING_FROM_VALUE: Record<number, Routing> = {
-  0: 'single',
-  1: 'parallel',
-  2: 'serial',
-  3: 'leftRight',
 }
 
 export const ROUTING_LABELS: Record<Routing, string> = {

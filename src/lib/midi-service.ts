@@ -23,11 +23,6 @@ export function getOutputs(): MIDIOutput[] {
   return Array.from(midiAccess.outputs.values())
 }
 
-export function getInputs(): MIDIInput[] {
-  if (!midiAccess) return []
-  return Array.from(midiAccess.inputs.values())
-}
-
 export function selectOutput(port: MIDIOutput | null) {
   selectedOutput = port
   setThrottleOutput(port)

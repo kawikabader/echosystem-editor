@@ -93,7 +93,7 @@ export function EnginePanel({ engine, accent, accentDim }: EnginePanelProps) {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-text-secondary w-28 text-right shrink-0">
+          <span className="text-xs text-text-secondary w-20 lg:w-28 text-right shrink-0">
             Delay Source
           </span>
           <div className="flex gap-1">
@@ -101,7 +101,7 @@ export function EnginePanel({ engine, accent, accentDim }: EnginePanelProps) {
               <Tooltip key={source} text={DELAY_SOURCE_TIPS[source]}>
                 <button
                   onClick={() => handleSourceChange(source)}
-                  className={`px-2 py-0.5 text-[11px] rounded transition-colors ${
+                  className={`px-3 py-1.5 lg:px-2 lg:py-0.5 text-xs lg:text-[11px] rounded transition-colors ${
                     engineState.delaySource === source
                       ? 'text-white'
                       : 'bg-surface-hover text-text-secondary hover:text-text-primary'

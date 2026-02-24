@@ -136,13 +136,6 @@ export function computeModeCC(modeIndex: number, subModeIndex: number): number {
   return value
 }
 
-export function decodeModeCC(ccValue: number): { modeIndex: number; subModeIndex: number } {
-  return {
-    modeIndex: Math.floor(ccValue / 8),
-    subModeIndex: ccValue % 8,
-  }
-}
-
 export function getModeDefinition(modeIndex: number): ModeDefinition | undefined {
   return MODE_DEFINITIONS.find((m) => m.index === modeIndex)
 }

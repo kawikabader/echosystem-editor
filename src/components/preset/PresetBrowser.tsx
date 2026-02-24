@@ -77,7 +77,7 @@ export function PresetBrowser() {
           <Tooltip text={PRESET_TIPS.import}>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors"
+              className="text-xs lg:text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors"
             >
               Import
             </button>
@@ -86,7 +86,7 @@ export function PresetBrowser() {
             <button
               onClick={handleExportCurrent}
               disabled={activePresetId === null}
-              className="text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors disabled:opacity-30"
+              className="text-xs lg:text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors disabled:opacity-30"
             >
               Export
             </button>
@@ -94,7 +94,7 @@ export function PresetBrowser() {
           <Tooltip text={PRESET_TIPS.exportAll}>
             <button
               onClick={handleExportAll}
-              className="text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors"
+              className="text-xs lg:text-[10px] px-2 py-1 rounded bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active transition-colors"
             >
               Export All
             </button>

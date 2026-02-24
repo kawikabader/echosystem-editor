@@ -13,7 +13,7 @@ export function RoutingSelector() {
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+      <label className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
         Routing
       </label>
       <div className="flex flex-col gap-1">

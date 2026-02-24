@@ -14,8 +14,7 @@ const ACCENT_B_DIM = '#92400e'
 
 export default function App() {
   useMidiInit()
-  const routing = useStore((s) => s.global.routing)
-  const isDual = routing !== 'single'
+  const isDual = useStore((s) => s.global.routing !== 'single')
   const activePresetId = useStore((s) => s.activePresetId)
   const loadPreset = useStore((s) => s.loadPreset)
   const soloEngine = useStore((s) => s.soloEngine)
@@ -41,16 +40,16 @@ export default function App() {
       sidebar={<PresetBrowser />}
       main={
         <div className={`grid grid-cols-1 ${isDual ? 'lg:grid-cols-2' : ''} gap-4 max-w-5xl mx-auto`}>
-          <div className={`transition-opacity ${soloEngine === 'B' ? 'opacity-40' : ''}`}>
+          <div data-section="engineA" className={`transition-opacity ${soloEngine === 'B' ? 'opacity-40' : ''}`}>
             <EnginePanel engine="A" accent={ACCENT_A} accentDim={ACCENT_A_DIM} />
           </div>
           {isDual && (
-            <div className={`transition-opacity ${soloEngine === 'A' ? 'opacity-40' : ''}`}>
+            <div data-section="engineB" className={`transition-opacity ${soloEngine === 'A' ? 'opacity-40' : ''}`}>
               <EnginePanel engine="B" accent={ACCENT_B} accentDim={ACCENT_B_DIM} />
             </div>
           )}
 
-          <div className="lg:hidden col-span-1">
+          <div data-section="controls" className="lg:hidden col-span-1">
             <div className="rounded-lg border border-border bg-surface p-4">
               <GlobalControls />
             </div>

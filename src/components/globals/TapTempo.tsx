@@ -7,11 +7,12 @@ import { Tooltip } from '../ui/Tooltip'
 
 export function TapTempo() {
   const midiChannel = useStore((s) => s.midiChannel)
-  const [lastTap, setLastTap] = useState<number | null>(null)
+  const lastTapRef = useRef<number | null>(null)
   const [bpm, setBpm] = useState<number | null>(null)
   const [bpmInput, setBpmInput] = useState('')
   const [holding, setHolding] = useState(false)
   const tapTimesRef = useRef<number[]>([])
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const sendTapsForBpm = useCallback(
     (targetBpm: number) => {
@@ -30,6 +31,7 @@ export function TapTempo() {
     midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
 
     const now = performance.now()
+    const lastTap = lastTapRef.current
     if (lastTap !== null) {
       const interval = now - lastTap
       tapTimesRef.current.push(interval)
@@ -40,13 +42,14 @@ export function TapTempo() {
         tapTimesRef.current.reduce((a, b) => a + b, 0) / tapTimesRef.current.length
       setBpm(Math.round(60000 / avg))
     }
-    setLastTap(now)
+    lastTapRef.current = now
 
-    setTimeout(() => {
+    clearTimeout(resetTimerRef.current)
+    resetTimerRef.current = setTimeout(() => {
       tapTimesRef.current = []
-      setLastTap(null)
+      lastTapRef.current = null
     }, 3000)
-  }, [midiChannel, lastTap])
+  }, [midiChannel])
 
   const handleBpmSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -71,7 +74,7 @@ export function TapTempo() {
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+      <label className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
         Tap Tempo
       </label>
       <div className="grid grid-cols-2 gap-1">
@@ -106,7 +109,7 @@ export function TapTempo() {
           placeholder={bpm !== null ? String(bpm) : 'BPM'}
           value={bpmInput}
           onChange={(e) => setBpmInput(e.target.value)}
-          className="w-full bg-surface-hover border border-border rounded px-2 py-1 text-xs text-text-primary text-center outline-none focus:border-accent tabular-nums placeholder:text-text-muted"
+          className="w-full bg-surface-hover border border-border rounded px-2 py-2 lg:py-1 text-base lg:text-xs text-text-primary text-center outline-none focus:border-accent tabular-nums placeholder:text-text-muted"
         />
       </form>
     </div>

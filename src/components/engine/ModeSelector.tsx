@@ -42,7 +42,7 @@ export function ModeSelector({ engine, accent }: ModeSelectorProps) {
           <Tooltip key={mode.index} text={MODE_CATEGORY_TIPS[mode.name] ?? mode.name}>
             <button
               onClick={() => handleCategoryChange(mode.index)}
-              className={`px-2 py-1 text-[11px] rounded font-medium transition-colors ${
+              className={`px-3 py-2 lg:px-2 lg:py-1 text-xs lg:text-[11px] rounded font-medium transition-colors ${
                 mode.index === modeIndex
                   ? 'text-white'
                   : 'bg-surface-hover text-text-secondary hover:text-text-primary hover:bg-surface-active'
@@ -61,7 +61,7 @@ export function ModeSelector({ engine, accent }: ModeSelectorProps) {
             <Tooltip key={sub.index} text={SUB_MODE_TIPS[sub.name] ?? sub.name}>
               <button
                 onClick={() => handleSubModeChange(sub.index)}
-                className={`px-2 py-0.5 text-[11px] rounded-full transition-colors ${
+                className={`px-3 py-1.5 lg:px-2 lg:py-0.5 text-xs lg:text-[11px] rounded-full transition-colors ${
                   sub.index === subModeIndex
                     ? 'text-white border'
                     : 'bg-surface-hover text-text-secondary hover:text-text-primary'

@@ -103,7 +103,7 @@ export function PresetSlot({ id }: PresetSlotProps) {
         />
       ) : (
         <div className="flex items-center justify-between gap-1">
-          <span className="text-[11px] text-text-primary truncate">
+          <span className="text-sm lg:text-[11px] text-text-primary truncate">
             <span className="text-text-muted">{String(id + 1).padStart(2, '0')}</span>{' '}
             {name}
             {showDirty && ' *'}
@@ -112,21 +112,21 @@ export function PresetSlot({ id }: PresetSlotProps) {
             {isActive && (
               <button
                 onClick={handleRename}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-surface-active text-text-muted hover:text-text-secondary"
+                className="text-xs lg:text-[9px] px-2.5 py-1.5 lg:px-1.5 lg:py-0.5 rounded bg-surface-active text-text-muted hover:text-text-secondary"
               >
                 Rename
               </button>
             )}
             <button
               onClick={handleCopy}
-              className="text-[9px] px-1.5 py-0.5 rounded bg-surface-active text-text-muted hover:text-text-secondary"
+              className="text-xs lg:text-[9px] px-2.5 py-1.5 lg:px-1.5 lg:py-0.5 rounded bg-surface-active text-text-muted hover:text-text-secondary"
             >
               Copy
             </button>
             {hasClipboard && (
               <button
                 onClick={handlePaste}
-                className="text-[9px] px-1.5 py-0.5 rounded bg-accent/20 text-accent hover:bg-accent/30"
+                className="text-xs lg:text-[9px] px-2.5 py-1.5 lg:px-1.5 lg:py-0.5 rounded bg-accent/20 text-accent hover:bg-accent/30"
               >
                 Paste
               </button>

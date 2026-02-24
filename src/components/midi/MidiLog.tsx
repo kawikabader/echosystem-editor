@@ -63,25 +63,25 @@ export function MidiLog({ onClose }: { onClose: () => void }) {
   return (
     <div className="border-t border-border bg-[#0d0d0d] flex flex-col" style={{ height: 200 }}>
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border shrink-0">
-        <span className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+        <span className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
           MIDI Log
         </span>
         <div className="flex gap-2">
           <button
             onClick={handleClear}
-            className="text-[10px] text-text-muted hover:text-text-secondary transition-colors"
+            className="text-xs lg:text-[10px] text-text-muted hover:text-text-secondary transition-colors"
           >
             Clear
           </button>
           <button
             onClick={onClose}
-            className="text-[10px] text-text-muted hover:text-text-secondary transition-colors"
+            className="text-xs lg:text-[10px] text-text-muted hover:text-text-secondary transition-colors"
           >
             Close
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto font-mono text-[11px] leading-5 px-3 py-1">
+      <div className="flex-1 overflow-y-auto font-mono text-sm lg:text-[11px] leading-5 px-3 py-1">
         {entries.length === 0 && (
           <p className="text-text-muted py-2">No messages yet.</p>
         )}

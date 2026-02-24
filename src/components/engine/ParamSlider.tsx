@@ -18,6 +18,7 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
   const shiftRef = useRef(false)
   const draggingRef = useRef(false)
   const localRef = useRef<number>(value as number)
+  const rafRef = useRef<number>(0)
   const [localValue, setLocalValue] = useState<number>(value as number)
 
   useEffect(() => {
@@ -40,20 +41,17 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
     [localValue],
   )
 
-  const setLocal = useCallback((v: number) => {
-    localRef.current = v
-    setLocalValue(v)
-  }, [])
-
   const handlePointerDown = useCallback(
     (e: React.PointerEvent) => {
       e.preventDefault()
       shiftRef.current = e.shiftKey
       draggingRef.current = true
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-      setLocal(calcValue(e.clientX))
+      const next = calcValue(e.clientX)
+      localRef.current = next
+      setLocalValue(next)
     },
-    [calcValue, setLocal],
+    [calcValue],
   )
 
   const handlePointerMove = useCallback(
@@ -61,18 +59,24 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
       if (e.buttons === 0) return
       shiftRef.current = e.shiftKey
 
+      let next: number
       if (shiftRef.current) {
         const rect = trackRef.current?.getBoundingClientRect()
         if (!rect) return
         const delta = e.movementX / rect.width
         const fineDelta = delta * 0.1
-        const next = Math.max(0, Math.min(127, Math.round(localRef.current + fineDelta * 127)))
-        setLocal(next)
+        next = Math.max(0, Math.min(127, Math.round(localRef.current + fineDelta * 127)))
       } else {
-        setLocal(calcValue(e.clientX))
+        next = calcValue(e.clientX)
       }
+
+      localRef.current = next
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(() => {
+        setLocalValue(next)
+      })
     },
-    [calcValue, setLocal],
+    [calcValue],
   )
 
   const handlePointerUp = useCallback(() => {
@@ -140,12 +144,12 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
     <div className="flex items-center gap-3 group">
       {tooltip ? (
         <Tooltip text={tooltip}>
-          <span className="text-xs text-text-secondary w-28 text-right truncate shrink-0 cursor-help">
+          <span className="text-xs text-text-secondary w-20 lg:w-28 text-right truncate shrink-0 cursor-help">
             {label}
           </span>
         </Tooltip>
       ) : (
-        <span className="text-xs text-text-secondary w-28 text-right truncate shrink-0">
+        <span className="text-xs text-text-secondary w-20 lg:w-28 text-right truncate shrink-0">
           {label}
         </span>
       )}
@@ -159,21 +163,21 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
         aria-valuemax={127}
         aria-valuetext={`${label}: ${formatValue ? formatValue(localValue) : `${displayPct}%`}`}
         aria-label={label}
-        className="relative h-6 flex-1 cursor-pointer rounded select-none outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="relative min-h-11 lg:min-h-0 lg:h-6 flex-1 flex items-center cursor-pointer rounded select-none touch-none outline-none focus-visible:ring-2 focus-visible:ring-accent"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onDoubleClick={handleDoubleClick}
         onKeyDown={handleKeyDown}
       >
-        <div className="absolute inset-0 bg-surface-hover rounded" />
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-2 lg:h-full lg:top-0 lg:translate-y-0 bg-surface-hover rounded" />
         <div
-          className="absolute inset-y-0 left-0 rounded transition-none"
+          className="absolute top-1/2 -translate-y-1/2 h-2 lg:h-full lg:top-0 lg:translate-y-0 left-0 rounded transition-none"
           style={{ width: `${pct}%`, backgroundColor: accent, opacity: 0.3 }}
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-3 h-5 rounded-sm transition-none"
-          style={{ left: `calc(${pct}% - 6px)`, backgroundColor: accent }}
+          className="absolute top-1/2 -translate-y-1/2 w-6 h-6 lg:w-3 lg:h-5 rounded-full lg:rounded-sm transition-none after:content-[''] after:absolute after:-inset-2 after:rounded-full"
+          style={{ left: `calc(${pct}% - 12px)`, backgroundColor: accent }}
         />
       </div>
 
@@ -187,7 +191,7 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
           onBlur={commitEdit}
           onKeyDown={handleKeyDown}
           autoFocus
-          className="w-12 bg-surface-hover border border-accent rounded px-1 py-0.5 text-xs text-text-primary text-center outline-none"
+          className="w-12 bg-surface-hover border border-accent rounded px-1 py-0.5 text-base lg:text-xs text-text-primary text-center outline-none"
         />
       ) : (
         <span

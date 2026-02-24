@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useStore } from '../../store'
 import { GLOBAL_CC } from '../../lib/midi-constants'
 import { GLOBAL_TIPS } from '../../lib/tooltips'
@@ -9,22 +9,26 @@ export function MidiClockToggles() {
   const midiChannel = useStore((s) => s.midiChannel)
   const [clockA, setClockA] = useState(true)
   const [clockB, setClockB] = useState(true)
+  const clockARef = useRef(true)
+  const clockBRef = useRef(true)
 
   const toggleClockA = useCallback(() => {
-    const next = !clockA
+    const next = !clockARef.current
+    clockARef.current = next
     setClockA(next)
     midi.sendCC(midiChannel, GLOBAL_CC.clockA, next ? 127 : 0)
-  }, [midiChannel, clockA])
+  }, [midiChannel])
 
   const toggleClockB = useCallback(() => {
-    const next = !clockB
+    const next = !clockBRef.current
+    clockBRef.current = next
     setClockB(next)
     midi.sendCC(midiChannel, GLOBAL_CC.clockB, next ? 127 : 0)
-  }, [midiChannel, clockB])
+  }, [midiChannel])
 
   return (
     <div className="space-y-1.5">
-      <label className="text-[10px] text-text-muted uppercase tracking-wider font-medium">
+      <label className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
         MIDI Clock
       </label>
       <div className="grid grid-cols-2 gap-1">
@@ -53,7 +57,7 @@ export function MidiClockToggles() {
           </button>
         </Tooltip>
       </div>
-      <p className="text-[10px] text-text-muted">
+      <p className="text-xs lg:text-[10px] text-text-muted">
         Requires Global Tap (blue) mode on pedal.
       </p>
     </div>
