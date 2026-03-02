@@ -31,7 +31,6 @@ export const GLOBAL_TIPS = {
   soloB: 'Solo Engine B — mutes Engine A temporarily.',
   clockA: 'Enable/disable MIDI clock sync for Engine A. Requires Global Tap mode.',
   clockB: 'Enable/disable MIDI clock sync for Engine B. Requires Global Tap mode.',
-  sync: 'Push all current editor parameter values to the pedal as CC messages.',
   save: 'Save the current editor state to this preset slot on the pedal.',
   expression: 'Virtual expression pedal (0–127). Controls whichever params are mapped on the pedal.',
 }
@@ -43,6 +42,13 @@ export const PRESET_TIPS = {
   import: 'Import .bin preset files from your computer.',
   export: 'Export the active preset as a .bin file.',
   exportAll: 'Export all presets as a .zip for SD card transfer.',
+}
+
+export const STORAGE_TIPS = {
+  saveToFolder: 'Choose a folder on your computer to save all presets as a JSON file.',
+  saveAll: 'Save all preset names and settings to the selected folder.',
+  load: 'Load presets from the saved JSON file, replacing current editor presets.',
+  disconnect: 'Stop using this folder. Your saved file is not deleted.',
 }
 
 export const MODE_CATEGORY_TIPS: Record<string, string> = {

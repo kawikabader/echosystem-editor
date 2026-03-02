@@ -8,7 +8,7 @@
   --color-border-subtle: #262626;
   --color-text-primary: #e8e8e8;
   --color-text-secondary: #a0a0a0;
-  --color-text-muted: #666666;
+  --color-text-muted: #808080;
   --color-engine-a: #3b82f6;
   --color-engine-a-dim: #1e40af;
   --color-engine-b: #f59e0b;
@@ -48,4 +48,19 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

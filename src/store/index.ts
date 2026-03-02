@@ -4,11 +4,13 @@ import { immer } from 'zustand/middleware/immer'
 import type { DeviceSlice } from './device-slice'
 import type { MidiSlice } from './midi-slice'
 import type { PresetSlice } from './preset-slice'
+import type { StorageSlice } from './storage-slice'
 import { createDeviceSlice } from './device-slice'
 import { createMidiSlice } from './midi-slice'
 import { createPresetSlice } from './preset-slice'
+import { createStorageSlice } from './storage-slice'
 
-export type StoreState = DeviceSlice & MidiSlice & PresetSlice
+export type StoreState = DeviceSlice & MidiSlice & PresetSlice & StorageSlice
 
 export const useStore = create<StoreState>()(
   devtools(
@@ -18,6 +20,7 @@ export const useStore = create<StoreState>()(
           ...createDeviceSlice(...a),
           ...createMidiSlice(...a),
           ...createPresetSlice(...a),
+          ...createStorageSlice(...a),
         })),
       ),
       {
@@ -32,6 +35,7 @@ export const useStore = create<StoreState>()(
           global: state.global,
           lastPortName: state.lastPortName,
           midiChannel: state.midiChannel,
+          bpm: state.bpm,
         }),
       },
     ),

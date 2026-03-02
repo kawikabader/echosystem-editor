@@ -1,30 +1,12 @@
-import { useCallback, useRef, useState } from 'react'
 import { useStore } from '../../store'
-import { GLOBAL_CC } from '../../lib/midi-constants'
 import { GLOBAL_TIPS } from '../../lib/tooltips'
-import * as midi from '../../lib/midi-service'
 import { Tooltip } from '../ui/Tooltip'
 
 export function MidiClockToggles() {
-  const midiChannel = useStore((s) => s.midiChannel)
-  const [clockA, setClockA] = useState(true)
-  const [clockB, setClockB] = useState(true)
-  const clockARef = useRef(true)
-  const clockBRef = useRef(true)
-
-  const toggleClockA = useCallback(() => {
-    const next = !clockARef.current
-    clockARef.current = next
-    setClockA(next)
-    midi.sendCC(midiChannel, GLOBAL_CC.clockA, next ? 127 : 0)
-  }, [midiChannel])
-
-  const toggleClockB = useCallback(() => {
-    const next = !clockBRef.current
-    clockBRef.current = next
-    setClockB(next)
-    midi.sendCC(midiChannel, GLOBAL_CC.clockB, next ? 127 : 0)
-  }, [midiChannel])
+  const clockA = useStore((s) => s.clockA)
+  const clockB = useStore((s) => s.clockB)
+  const toggleClockA = useStore((s) => s.toggleClockA)
+  const toggleClockB = useStore((s) => s.toggleClockB)
 
   return (
     <div className="space-y-1.5">

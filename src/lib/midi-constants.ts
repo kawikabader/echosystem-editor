@@ -53,3 +53,22 @@ export const GLOBAL_CC = {
 
 export const DEFAULT_MIDI_CHANNEL = 6
 export const MAX_PRESETS = 36
+
+/** Reverse lookup: CC number → engine/param or global target */
+export type CCTarget =
+  | { type: 'engineParam'; engine: EngineId; param: EngineParamName }
+  | { type: 'global'; param: keyof typeof GLOBAL_CC }
+
+export const CC_TO_TARGET: ReadonlyMap<number, CCTarget> = (() => {
+  const map = new Map<number, CCTarget>()
+  for (const [param, cc] of Object.entries(ENGINE_A_CC)) {
+    map.set(cc, { type: 'engineParam', engine: 'A', param: param as EngineParamName })
+  }
+  for (const [param, cc] of Object.entries(ENGINE_B_CC)) {
+    map.set(cc, { type: 'engineParam', engine: 'B', param: param as EngineParamName })
+  }
+  for (const [param, cc] of Object.entries(GLOBAL_CC)) {
+    map.set(cc, { type: 'global', param: param as keyof typeof GLOBAL_CC })
+  }
+  return map
+})()

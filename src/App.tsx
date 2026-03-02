@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useMidiInit } from './hooks/useMidiPorts'
+import { useStorageInit } from './hooks/useStorageInit'
 import { AppShell } from './components/layout/AppShell'
 import { ConnectionPanel } from './components/midi/ConnectionPanel'
 import { EnginePanel } from './components/engine/EnginePanel'
@@ -14,6 +15,7 @@ const ACCENT_B_DIM = '#92400e'
 
 export default function App() {
   useMidiInit()
+  useStorageInit()
   const isDual = useStore((s) => s.global.routing !== 'single')
   const activePresetId = useStore((s) => s.activePresetId)
   const loadPreset = useStore((s) => s.loadPreset)

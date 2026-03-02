@@ -22,10 +22,11 @@ export function ConnectionPanel() {
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4 px-3 py-2 bg-surface rounded-lg border border-border">
       <div className="flex items-center gap-2 min-w-0">
-        <label className="text-xs text-text-secondary uppercase tracking-wider font-medium hidden sm:inline">
+        <label htmlFor="midi-device" className="text-xs text-text-secondary uppercase tracking-wider font-medium hidden sm:inline">
           Device
         </label>
         <select
+          id="midi-device"
           value={selectedPortId ?? ''}
           onChange={(e) => selectPort(e.target.value)}
           className="bg-surface-hover border border-border rounded px-2 py-1.5 text-base lg:text-sm text-text-primary outline-none focus:border-accent flex-1 min-w-0 truncate"
@@ -41,10 +42,11 @@ export function ConnectionPanel() {
 
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-text-secondary uppercase tracking-wider font-medium">
+          <label htmlFor="midi-channel" className="text-xs text-text-secondary uppercase tracking-wider font-medium">
             CH
           </label>
           <select
+            id="midi-channel"
             value={midiChannel}
             onChange={(e) => setMidiChannel(Number(e.target.value))}
             className="bg-surface-hover border border-border rounded px-2 py-1.5 text-base lg:text-sm text-text-primary outline-none focus:border-accent w-16"

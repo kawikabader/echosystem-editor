@@ -1,36 +1,32 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState, type FocusEvent } from 'react'
 import { useStore } from '../../store'
 import { GLOBAL_CC } from '../../lib/midi-constants'
 import { GLOBAL_TIPS } from '../../lib/tooltips'
 import * as midi from '../../lib/midi-service'
 import { Tooltip } from '../ui/Tooltip'
 
+/**
+ * Outgoing tap timestamps are tracked so that if incoming CC 35 handling
+ * is ever added (e.g. via a MIDI loop), echoes within this window can be
+ * filtered out to prevent double-counting in BPM calculation.
+ */
+const ECHO_SUPPRESS_MS = 80
+
 export function TapTempo() {
   const midiChannel = useStore((s) => s.midiChannel)
   const lastTapRef = useRef<number | null>(null)
-  const [bpm, setBpm] = useState<number | null>(null)
+  const lastOutgoingTapRef = useRef(0)
+  const bpm = useStore((s) => s.bpm)
+  const setBpm = useStore((s) => s.setBpm)
   const [bpmInput, setBpmInput] = useState('')
+  const [editing, setEditing] = useState(false)
   const [holding, setHolding] = useState(false)
   const tapTimesRef = useRef<number[]>([])
   const resetTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
-  const sendTapsForBpm = useCallback(
-    (targetBpm: number) => {
-      const intervalMs = 60000 / targetBpm
-      midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
-      setTimeout(() => {
-        midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
-      }, intervalMs)
-      setBpm(targetBpm)
-      setBpmInput('')
-    },
-    [midiChannel],
-  )
+  const recordTap = useCallback((now: number) => {
+    if (now - lastOutgoingTapRef.current < ECHO_SUPPRESS_MS && lastTapRef.current !== null) return
 
-  const handleTap = useCallback(() => {
-    midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
-
-    const now = performance.now()
     const lastTap = lastTapRef.current
     if (lastTap !== null) {
       const interval = now - lastTap
@@ -49,7 +45,28 @@ export function TapTempo() {
       tapTimesRef.current = []
       lastTapRef.current = null
     }, 3000)
-  }, [midiChannel])
+  }, [])
+
+  const sendTapsForBpm = useCallback(
+    (targetBpm: number) => {
+      const intervalMs = 60000 / targetBpm
+      lastOutgoingTapRef.current = performance.now()
+      midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
+      setTimeout(() => {
+        lastOutgoingTapRef.current = performance.now()
+        midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
+      }, intervalMs)
+      setBpm(targetBpm)
+      setBpmInput('')
+    },
+    [midiChannel],
+  )
+
+  const handleTap = useCallback(() => {
+    lastOutgoingTapRef.current = performance.now()
+    midi.sendCC(midiChannel, GLOBAL_CC.tap, 64)
+    recordTap(performance.now())
+  }, [midiChannel, recordTap])
 
   const handleBpmSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -58,9 +75,21 @@ export function TapTempo() {
       if (!isNaN(parsed) && parsed >= 20 && parsed <= 300) {
         sendTapsForBpm(parsed)
       }
+      setEditing(false)
     },
     [bpmInput, sendTapsForBpm],
   )
+
+  const handleBpmFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    setEditing(true)
+    setBpmInput(bpm !== null ? String(bpm) : '')
+    requestAnimationFrame(() => e.target.select())
+  }, [bpm])
+
+  const handleBpmBlur = useCallback(() => {
+    setEditing(false)
+    setBpmInput('')
+  }, [])
 
   const handleInfiniteDown = useCallback(() => {
     setHolding(true)
@@ -106,9 +135,11 @@ export function TapTempo() {
           type="number"
           min={20}
           max={300}
-          placeholder={bpm !== null ? String(bpm) : 'BPM'}
-          value={bpmInput}
+          placeholder="BPM"
+          value={editing ? bpmInput : (bpm !== null ? String(bpm) : '')}
           onChange={(e) => setBpmInput(e.target.value)}
+          onFocus={handleBpmFocus}
+          onBlur={handleBpmBlur}
           className="w-full bg-surface-hover border border-border rounded px-2 py-2 lg:py-1 text-base lg:text-xs text-text-primary text-center outline-none focus:border-accent tabular-nums placeholder:text-text-muted"
         />
       </form>

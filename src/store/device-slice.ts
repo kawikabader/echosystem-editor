@@ -3,27 +3,90 @@ import type { MidiValue } from '../lib/midi-types'
 import type { EngineState, GlobalState, TunableParam, Routing, DelaySource, EngineId } from '../lib/echosystem'
 import { createDefaultEngine } from '../lib/echosystem'
 import { computeModeCC } from '../lib/echosystem'
-import { ENGINE_CC, GLOBAL_CC } from '../lib/midi-constants'
+import { ENGINE_CC, GLOBAL_CC, CC_TO_TARGET } from '../lib/midi-constants'
 import { ROUTING_VALUES, DELAY_SOURCE_VALUES } from '../lib/echosystem/types'
 import * as midi from '../lib/midi-service'
 import type { StoreState } from './index'
+
+const DELAY_SOURCE_BY_VALUE = Object.fromEntries(
+  Object.entries(DELAY_SOURCE_VALUES).map(([k, v]) => [v, k]),
+) as Record<number, DelaySource>
+
+const ROUTING_BY_VALUE = Object.fromEntries(
+  Object.entries(ROUTING_VALUES).map(([k, v]) => [v, k]),
+) as Record<number, Routing>
+
+type GlobalCCHandler = {
+  handle: (state: StoreState, value: number) => void
+  marksDirty: boolean
+}
+
+const GLOBAL_CC_HANDLERS: Partial<Record<keyof typeof GLOBAL_CC, GlobalCCHandler>> = {
+  engageBypass: {
+    handle: (state, value) => { state.global.bypassed = value === 0 },
+    marksDirty: false,
+  },
+  routing: {
+    handle: (state, value) => {
+      const routing = ROUTING_BY_VALUE[value]
+      if (routing) state.global.routing = routing
+    },
+    marksDirty: true,
+  },
+  bypass: {
+    handle: (state) => { state.global.bypassed = !state.global.bypassed },
+    marksDirty: false,
+  },
+  soloA: {
+    handle: (state, value) => {
+      state.soloEngine = value > 63 ? 'A' : (state.soloEngine === 'A' ? null : state.soloEngine)
+    },
+    marksDirty: false,
+  },
+  soloB: {
+    handle: (state, value) => {
+      state.soloEngine = value > 63 ? 'B' : (state.soloEngine === 'B' ? null : state.soloEngine)
+    },
+    marksDirty: false,
+  },
+  clockA: {
+    handle: (state, value) => { state.clockA = value > 63 },
+    marksDirty: false,
+  },
+  clockB: {
+    handle: (state, value) => { state.clockB = value > 63 },
+    marksDirty: false,
+  },
+  expression: {
+    handle: (state, value) => { state.expressionValue = value as MidiValue },
+    marksDirty: false,
+  },
+  // engineOrder: deferred until hardware-verified (double-swap risk if pedal also dumps params)
+}
 
 export interface DeviceSlice {
   engineA: EngineState
   engineB: EngineState
   global: GlobalState
   soloEngine: EngineId | null
-  syncing: boolean
+  expressionValue: MidiValue
+  clockA: boolean
+  clockB: boolean
+  bpm: number | null
 
+  setBpm: (bpm: number) => void
   setEngineParam: (engine: EngineId, param: TunableParam, value: MidiValue) => void
   setEngineMode: (engine: EngineId, modeIndex: number, subModeIndex: number) => void
   setDelaySource: (engine: EngineId, source: DelaySource) => void
   setRouting: (routing: Routing) => void
   toggleBypass: () => void
   setSoloEngine: (engine: EngineId | null) => void
-  sendFullState: () => void
+  toggleClockA: () => void
+  toggleClockB: () => void
+  setExpression: (value: MidiValue) => void
   applyEngineState: (engine: EngineId, state: EngineState) => void
   applyGlobalState: (state: GlobalState) => void
+  receiveCC: (cc: number, value: number) => void
 }
 
 export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', never]], [], DeviceSlice> = (set, get) => ({
@@ -35,7 +98,14 @@ export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', neve
     tempo: 64 as MidiValue,
   },
   soloEngine: null,
-  syncing: false,
+  expressionValue: 0 as MidiValue,
+  clockA: true,
+  clockB: true,
+  bpm: null,
+
+  setBpm: (bpm) => {
+    set((state) => { state.bpm = bpm })
+  },
 
   setEngineParam: (engine, param, value) => {
     const ch = get().midiChannel
@@ -111,34 +181,21 @@ export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', neve
     }
   },
 
-  sendFullState: () => {
-    if (get().syncing) return
-    const { engineA, engineB, global: g, midiChannel: ch } = get()
+  toggleClockA: () => {
+    const next = !get().clockA
+    midi.sendCC(get().midiChannel, GLOBAL_CC.clockA, next ? 127 : 0)
+    set((state) => { state.clockA = next })
+  },
 
-    const messages: Array<{ cc: number; value: number }> = []
+  toggleClockB: () => {
+    const next = !get().clockB
+    midi.sendCC(get().midiChannel, GLOBAL_CC.clockB, next ? 127 : 0)
+    set((state) => { state.clockB = next })
+  },
 
-    for (const [engine, state] of [['A', engineA], ['B', engineB]] as const) {
-      const ccMap = ENGINE_CC[engine]
-      messages.push({ cc: ccMap.mode, value: computeModeCC(state.modeIndex, state.subModeIndex) })
-      messages.push({ cc: ccMap.ratio, value: state.ratio as number })
-      messages.push({ cc: ccMap.mix, value: state.mix as number })
-      messages.push({ cc: ccMap.volume, value: state.volume as number })
-      messages.push({ cc: ccMap.feedback, value: state.feedback as number })
-      messages.push({ cc: ccMap.tone, value: state.tone as number })
-      messages.push({ cc: ccMap.thing1, value: state.thing1 as number })
-      messages.push({ cc: ccMap.thing2, value: state.thing2 as number })
-      messages.push({ cc: ccMap.delaySource, value: DELAY_SOURCE_VALUES[state.delaySource] })
-    }
-
-    messages.push({ cc: GLOBAL_CC.routing, value: ROUTING_VALUES[g.routing] })
-    messages.push({ cc: GLOBAL_CC.engageBypass, value: g.bypassed ? 0 : 127 })
-
-    const spacingMs = 20
-    set((state) => { state.syncing = true })
-    midi.sendBulkCC(ch, messages, spacingMs)
-    setTimeout(() => {
-      set((state) => { state.syncing = false })
-    }, messages.length * spacingMs + 50)
+  setExpression: (value) => {
+    midi.sendCCThrottled(get().midiChannel, GLOBAL_CC.expression, value as number)
+    set((state) => { state.expressionValue = value })
   },
 
   applyEngineState: (engine, engineState) => {
@@ -155,5 +212,51 @@ export const createDeviceSlice: StateCreator<StoreState, [['zustand/immer', neve
     set((state) => {
       state.global = { ...globalState }
     })
+  },
+
+  receiveCC: (cc, value) => {
+    const target = CC_TO_TARGET.get(cc)
+    if (!target) return
+
+    if (target.type === 'engineParam') {
+      const { engine, param } = target
+      set((state) => {
+        const eng = engine === 'A' ? state.engineA : state.engineB
+        if (param === 'mode') {
+          eng.modeIndex = Math.floor(value / 8)
+          eng.subModeIndex = value % 8
+        } else if (param === 'delaySource') {
+          const source = DELAY_SOURCE_BY_VALUE[value]
+          if (source) eng.delaySource = source
+        } else {
+          ;(eng as Record<string, unknown>)[param] = value as MidiValue
+        }
+      })
+      get().markDirty()
+      return
+    }
+
+    if (target.param === 'savePreset') {
+      const id = value - 1
+      if (id >= 0) {
+        set((state) => {
+          state.presets[id] = {
+            ...state.presets[id],
+            engineA: { ...get().engineA },
+            engineB: { ...get().engineB },
+            global: { ...get().global },
+          }
+          state.activePresetId = id
+          state.dirty = false
+        })
+      }
+      return
+    }
+
+    const entry = GLOBAL_CC_HANDLERS[target.param]
+    if (entry) {
+      set((state) => { entry.handle(state, value) })
+      if (entry.marksDirty) get().markDirty()
+    }
   },
 })

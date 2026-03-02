@@ -46,15 +46,40 @@ export const createMidiSlice: StateCreator<StoreState, [['zustand/immer', never]
         state.availableOutputs = outputs
       })
 
+      // Register incoming CC handler → routes to store's receiveCC
+      midi.setIncomingCCHandler((channel, cc, value) => {
+        const { midiChannel, receiveCC } = get()
+        if (channel !== midiChannel) return
+        receiveCC(cc, value)
+      })
+
+      // Register incoming PC handler → updates activePresetId
+      // Pedal echoes PC on channels above its own, so accept from any channel.
+      midi.setIncomingPCHandler((_channel, program) => {
+        get().receivePC(program)
+      })
+
       const { lastPortName } = get()
       const autoPort = midi.autoDetectOutput(lastPortName ?? 'USB Uno MIDI Interface')
       if (autoPort) {
         midi.selectOutput(autoPort)
+        const autoInput = midi.autoDetectInput(autoPort.name ?? '')
+        if (autoInput) midi.selectInput(autoInput)
         set((state) => {
           state.selectedPortId = autoPort.id
           state.selectedPortName = autoPort.name ?? 'Unknown Device'
           state.connected = true
         })
+
+        // After handshake completes (~6s for Identity Request cycle),
+        // send a PC to trigger a full parameter dump from the pedal.
+        const { activePresetId } = get()
+        if (activePresetId != null) {
+          setTimeout(() => {
+            const ch = get().midiChannel
+            midi.sendPC(ch, activePresetId + 1)
+          }, 6000)
+        }
       }
     } catch {
       set((state) => {
@@ -67,6 +92,23 @@ export const createMidiSlice: StateCreator<StoreState, [['zustand/immer', never]
     const outputs = midi.getOutputs()
     const port = outputs.find((o) => o.id === portId) ?? null
     midi.selectOutput(port)
+
+    const input = port ? midi.autoDetectInput(port.name ?? '') : null
+    midi.selectInput(input)
+
+    if (input) {
+      midi.setIncomingCCHandler((channel, cc, value) => {
+        const { midiChannel, receiveCC } = get()
+        if (channel !== midiChannel) return
+        receiveCC(cc, value)
+      })
+      midi.setIncomingPCHandler((_channel, program) => {
+        get().receivePC(program)
+      })
+    } else {
+      midi.setIncomingCCHandler(null)
+      midi.setIncomingPCHandler(null)
+    }
 
     set((state) => {
       state.selectedPortId = port?.id ?? null
@@ -95,6 +137,7 @@ export const createMidiSlice: StateCreator<StoreState, [['zustand/immer', never]
         const stillExists = outputs.some((o) => o.id === state.selectedPortId)
         if (!stillExists) {
           midi.selectOutput(null)
+          midi.selectInput(null)
           state.selectedPortId = null
           state.selectedPortName = null
           state.connected = false

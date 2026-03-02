@@ -6,9 +6,9 @@ import * as midi from '../../lib/midi-service'
 import { Tooltip } from '../ui/Tooltip'
 import { RoutingSelector } from './RoutingSelector'
 import { BypassToggle } from './BypassToggle'
+import { ExpressionPedal } from './ExpressionPedal'
 import { TapTempo } from './TapTempo'
 import { MidiClockToggles } from './MidiClockToggles'
-import { SyncButton } from './SyncButton'
 import { SavePresetButton } from './SavePresetButton'
 
 export function GlobalControls() {
@@ -31,6 +31,7 @@ export function GlobalControls() {
   return (
     <div className="space-y-5">
       <BypassToggle />
+      <ExpressionPedal />
       <RoutingSelector />
       <TapTempo />
 
@@ -85,7 +86,6 @@ export function GlobalControls() {
       )}
 
       <MidiClockToggles />
-      <SyncButton />
       <SavePresetButton />
     </div>
   )

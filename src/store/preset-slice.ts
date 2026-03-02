@@ -27,6 +27,7 @@ export interface PresetSlice {
   clipboardPreset: Preset | null
 
   loadPreset: (id: number) => void
+  receivePC: (program: number) => void
   savePreset: (id: number) => void
   renamePreset: (id: number, name: string) => void
   copyPreset: (id: number) => void
@@ -36,6 +37,9 @@ export interface PresetSlice {
   markDirty: () => void
 }
 
+// Suppress dirty marking during the CC dump that follows a preset load/change (~2s)
+let dirtySuppressedUntil = 0
+
 export const createPresetSlice: StateCreator<StoreState, [['zustand/immer', never]], [], PresetSlice> = (set, get) => ({
   presets: Array.from({ length: MAX_PRESETS }, (_, i) => createEmptyPreset(i)),
   activePresetId: null,
@@ -43,18 +47,26 @@ export const createPresetSlice: StateCreator<StoreState, [['zustand/immer', neve
   clipboardPreset: null,
 
   loadPreset: (id) => {
-    const { presets, midiChannel } = get()
-    const preset = presets[id]
-    if (!preset) return
+    const { midiChannel } = get()
 
+    // Send PC to pedal — it will respond with a full CC dump
+    // that flows through receiveCC to update the store.
     midi.sendPC(midiChannel, id + 1)
+    dirtySuppressedUntil = Date.now() + 2000
 
     set((state) => {
       state.activePresetId = id
       state.dirty = false
-      state.engineA = { ...preset.engineA }
-      state.engineB = { ...preset.engineB }
-      state.global = { ...preset.global }
+    })
+  },
+
+  receivePC: (program) => {
+    const id = program - 1
+    if (id < 0 || id >= MAX_PRESETS) return
+    dirtySuppressedUntil = Date.now() + 2000
+    set((state) => {
+      state.activePresetId = id
+      state.dirty = false
     })
   },
 
@@ -125,6 +137,7 @@ export const createPresetSlice: StateCreator<StoreState, [['zustand/immer', neve
   },
 
   markDirty: () => {
+    if (Date.now() < dirtySuppressedUntil) return
     set((state) => {
       state.dirty = true
     })

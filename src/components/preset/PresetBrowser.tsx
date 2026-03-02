@@ -6,6 +6,7 @@ import { parsePresetBin, buildPresetBin } from '../../lib/preset-codec'
 import { exportAllPresetsAsZip } from '../../lib/preset-codec'
 import { Tooltip } from '../ui/Tooltip'
 import { PresetSlot } from './PresetSlot'
+import { StorageControls } from './StorageControls'
 
 export function PresetBrowser() {
   const presets = useStore((s) => s.presets)
@@ -117,7 +118,7 @@ export function PresetBrowser() {
         ))}
       </div>
 
-    
+      <StorageControls />
     </div>
   )
 }

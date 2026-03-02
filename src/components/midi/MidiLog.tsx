@@ -43,19 +43,24 @@ const CC_LABELS: Record<number, string> = {
 }
 
 function formatEntry(entry: MidiLogEntry): string {
-  if (entry.type === 'PC') {
-    return `PC  ch${entry.channel}  program=${entry.value}`
+  const dir = entry.direction === 'in' ? '←' : '→'
+  if (entry.type === 'SysEx') {
+    return `${dir} SysEx  ${entry.message}`
   }
-  const label = entry.cc !== undefined ? CC_LABELS[entry.cc] : undefined
-  return `CC  ch${entry.channel}  cc=${entry.cc}  val=${entry.value}${label ? `  (${label})` : ''}`
+  if (entry.type === 'PC') {
+    return `${dir} PC  ch${entry.channel}  program=${entry.value}`
+  }
+  const label = CC_LABELS[entry.cc]
+  return `${dir} CC  ch${entry.channel}  cc=${entry.cc}  val=${entry.value}${label ? `  (${label})` : ''}`
 }
 
-export function MidiLog({ onClose }: { onClose: () => void }) {
+export function MidiLog() {
   const entries = useSyncExternalStore(subscribe, getEntries)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    bottomRef.current?.scrollIntoView({ behavior: prefersReduced ? 'auto' : 'smooth' })
   }, [entries.length])
 
   const handleClear = useCallback(() => clearLog(), [])
@@ -66,29 +71,29 @@ export function MidiLog({ onClose }: { onClose: () => void }) {
         <span className="text-xs lg:text-[10px] text-text-muted uppercase tracking-wider font-medium">
           MIDI Log
         </span>
-        <div className="flex gap-2">
-          <button
-            onClick={handleClear}
-            className="text-xs lg:text-[10px] text-text-muted hover:text-text-secondary transition-colors"
-          >
-            Clear
-          </button>
-          <button
-            onClick={onClose}
-            className="text-xs lg:text-[10px] text-text-muted hover:text-text-secondary transition-colors"
-          >
-            Close
-          </button>
-        </div>
+        <button
+          onClick={handleClear}
+          className="text-xs lg:text-[10px] text-text-muted hover:text-text-secondary transition-colors"
+        >
+          Clear
+        </button>
       </div>
-      <div className="flex-1 overflow-y-auto font-mono text-sm lg:text-[11px] leading-5 px-3 py-1">
+      <div className="flex-1 overflow-y-auto font-mono text-sm lg:text-xs leading-5 px-3 py-1">
         {entries.length === 0 && (
           <p className="text-text-muted py-2">No messages yet.</p>
         )}
         {entries.map((entry, i) => (
           <div key={i} className="flex gap-3">
             <span className="text-text-muted shrink-0">{formatTime(entry.timestamp)}</span>
-            <span className={entry.type === 'PC' ? 'text-success' : 'text-text-secondary'}>
+            <span className={
+              entry.type === 'SysEx'
+                ? 'text-purple-400'
+                : entry.direction === 'in'
+                  ? 'text-blue-400'
+                  : entry.type === 'PC'
+                    ? 'text-success'
+                    : 'text-text-secondary'
+            }>
               {formatEntry(entry)}
             </span>
           </div>

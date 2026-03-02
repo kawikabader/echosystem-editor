@@ -176,8 +176,8 @@ export function ParamSlider({ label, value, onChange, accent, formatValue, toolt
           style={{ width: `${pct}%`, backgroundColor: accent, opacity: 0.3 }}
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 w-6 h-6 lg:w-3 lg:h-5 rounded-full lg:rounded-sm transition-none after:content-[''] after:absolute after:-inset-2 after:rounded-full"
-          style={{ left: `calc(${pct}% - 12px)`, backgroundColor: accent }}
+          className="absolute top-1/2 w-6 h-6 lg:w-3 lg:h-5 rounded-full lg:rounded-sm transition-none after:content-[''] after:absolute after:-inset-2 after:rounded-full"
+          style={{ left: `${pct}%`, transform: `translate(-${pct}%, -50%)`, backgroundColor: accent }}
         />
       </div>
 

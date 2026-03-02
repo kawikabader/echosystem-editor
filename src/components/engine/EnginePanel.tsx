@@ -101,7 +101,7 @@ export function EnginePanel({ engine, accent, accentDim }: EnginePanelProps) {
               <Tooltip key={source} text={DELAY_SOURCE_TIPS[source]}>
                 <button
                   onClick={() => handleSourceChange(source)}
-                  className={`px-3 py-1.5 lg:px-2 lg:py-0.5 text-xs lg:text-[11px] rounded transition-colors ${
+                  className={`px-3 py-1.5 lg:px-2 lg:py-0.5 text-xs rounded transition-colors ${
                     engineState.delaySource === source
                       ? 'text-white'
                       : 'bg-surface-hover text-text-secondary hover:text-text-primary'
